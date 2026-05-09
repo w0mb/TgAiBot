@@ -1,14 +1,14 @@
 import random
 import httpx
 
-from src.utils.proxy_parser import get_valid_proxies
+from src.utils.proxy_parser import read_proxies_from_file
 
 
 class BaseAiService:
-    def __init__(self, api_key):
+    def __init__(self, api_key=None, **kwargs):
         self._api_key = api_key
 
-        proxies = get_valid_proxies()
+        proxies = read_proxies_from_file()
         if proxies is None or proxies == []:
             raise Exception("get_valid_proxies() вернул неверные данные")
 

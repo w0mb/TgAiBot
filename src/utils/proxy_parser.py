@@ -2,46 +2,84 @@ import httpx
 import requests
 import json
 import logging
+from pathlib import Path
 
 from config import settings
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
+PROXY_FILE = Path(__file__).parent.parent.parent / "proxy.json"
+print(PROXY_FILE)
 
-def download_proxies() -> list[dict]:
-    data = requests.get(url=settings.proxy_api_url).json()
-    valid_proxy = []
-    for d in data:
-        url = "http://" + d["ip"] + ":" + str(d["port"])
+def _validate_proxy(url: str) -> bool:
+    try:
         with httpx.Client(proxy=url, timeout=10.0) as client:
-            try:
-                response = client.get(
-                    "https://api.openai.com/v1/models",
-                    headers={"Authorization": "Bearer test_key"},
-                )
-                if response.status_code == 401:
-                    valid_proxy.append(d)
-            except:
-                continue
+            response_gpt = client.get(
+                "https://api.openai.com/v1/models",
+                headers={"Authorization": "Bearer test_key"},
+            )
+            response_tg = client.get(f"https://api.telegram.org/bot{settings.bot_token}/getMe")
+            return response_gpt.status_code == 401 and response_tg.status_code == 200
+    except Exception as e:
+        logger.debug(f"Прокси {url} недоступен: {e}")
+        return False
 
-    with open("../proxy.json", "w", encoding="utf-8") as file:
-        json.dump(valid_proxy, file, indent=2, ensure_ascii=False)
-    return valid_proxy
+def read_proxies_from_file() -> list[str]:
+    if not PROXY_FILE.exists():
+        raise FileNotFoundError("proxy.json не найден")
+    
+    with open(PROXY_FILE, "r") as f:
+        data = json.load(f)
+    
+    return [f"http://{p['ip']}:{p['port']}" for p in data] if data else []
+
+def download_proxies() -> list[str]:
+    logger.info("Загрузка прокси с API...")
+    data = requests.get(url=settings.proxy_api_url, timeout=30).json()
+
+    valid_proxies = []
+    for item in data:
+        url = f"http://{item['ip']}:{item['port']}"
+        if _validate_proxy(url):
+            valid_proxies.append(item)
+
+    logger.info(f"Найдено валидных прокси: {len(valid_proxies)}/{len(data)}")
+
+    with open(PROXY_FILE, "w", encoding="utf-8") as f:
+        json.dump(valid_proxies, f, indent=2, ensure_ascii=False)
+
+    return [f"http://{p['ip']}:{p['port']}" for p in valid_proxies]
 
 
 def get_valid_proxies() -> list[str]:
-    urls = []
-    with open("../proxy.json", "r", encoding="utf-8") as file:
-        data = json.load(file)
-        logger.info("Использую прокси из файла proxy.json")
-        if data:
-            for i in data:
-                urls.append("http://" + i["ip"] + ":" + str(i["port"]))
-        else:
-            logger.info("Файл не найден или пустой, загружаю новые прокси")
-            return download_proxies()
-    return urls
+    if not PROXY_FILE.exists():
+        logger.warning("proxy.json не найден, загружаю новые...")
+        return download_proxies()
+
+    logger.info(f"Загрузка прокси из {PROXY_FILE}")
+    with open(PROXY_FILE, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    if not data:
+        logger.warning("proxy.json пустой, загружаю новые...")
+        return download_proxies()
+
+    urls = [f"http://{p['ip']}:{p['port']}" for p in data]
+    valid = [p for p in urls if _validate_proxy(p)]
+
+    if valid:
+        return valid
+
+    logger.warning("Все прокси из файла недоступны, загружаю новые...")
+    counter = 0
+    while valid == []:
+        counter += 1
+        logger.warning(f"Пытаюсь скачать прокси попытка №{counter}")
+        valid = download_proxies()
+    return valid
+    
 
 
 if __name__ == "__main__":
-    get_valid_proxies()
+    logging.basicConfig(level=logging.INFO)
+    print(get_valid_proxies())

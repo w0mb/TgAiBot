@@ -1,8 +1,8 @@
 [
   {
-    "ip": "119.93.207.214",
-    "port": 8082,
-    "hostname": "119.93.207.214",
+    "ip": "144.31.108.161",
+    "port": 3128,
+    "hostname": "144.31.108.161",
     "http": 0,
     "https": 1,
     "socks4": 0,
@@ -12,15 +12,15 @@
     "mailru": 0,
     "telegram": 0,
     "avito": 0,
-    "country_code": "PH",
-    "response": 399,
-    "good_count": 9619,
-    "bad_count": 1629,
-    "last_check": "2026-04-26 16:30:47",
-    "city": "Patnongon",
-    "region": "Province of Antique",
-    "real_ip": "119.93.207.214",
-    "test_time": 3.3,
+    "country_code": "",
+    "response": 154,
+    "good_count": 5400,
+    "bad_count": 95,
+    "last_check": "2026-05-09 22:36:59",
+    "city": "",
+    "region": "",
+    "real_ip": "144.31.108.161",
+    "test_time": 0.9,
     "me": 0
   }
 ]

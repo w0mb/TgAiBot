@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import insert, select
 from src.schemas.users import Users
-from src.database import BaseOrm
+from databases.sql import BaseOrm
 
 class BaseRepository:
     session: AsyncSession

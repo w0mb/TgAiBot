@@ -5,9 +5,9 @@ from src.promts import all_promts
 
 
 class OpenAiService(BaseAiService):
-    def __init__(self, api_key):
-        super().__init__(api_key)
-        self.client = openai.OpenAI(api_key=self._api_key, http_client=self.http_client)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.client = openai.OpenAI(api_key=self._api_key, base_url="https://api.proxyapi.ru/openai/v1")
 
     async def analyze_image(self, base64_image):
         #надо как-то отрефакторить image_promt куда-то деть хз как

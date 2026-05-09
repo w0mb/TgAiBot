@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from src.database import BaseOrm
+from databases.sql import BaseOrm
 from src.config import settings
 from src.models.users import UsersOrm  # noqa: F401
 

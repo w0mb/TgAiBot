@@ -1,7 +1,7 @@
 from sqlalchemy import BigInteger
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.database import BaseOrm
+from databases.sql import BaseOrm
 
 
 class UsersOrm(BaseOrm):
