@@ -11,6 +11,10 @@ logger = logging.getLogger(__name__)
 PROXY_FILE = Path(__file__).parent.parent.parent / "proxy.json"
 print(PROXY_FILE)
 
+def _build_proxy_url(item: dict) -> str:
+    protocol = item.get("protocol", "http")
+    return f"{protocol}://{item['ip']}:{item['port']}"
+
 def _validate_proxy(url: str) -> bool:
     try:
         with httpx.Client(proxy=url, timeout=10.0) as client:
@@ -31,7 +35,7 @@ def read_proxies_from_file() -> list[str]:
     with open(PROXY_FILE, "r") as f:
         data = json.load(f)
     
-    return [f"http://{p['ip']}:{p['port']}" for p in data] if data else []
+    return [_build_proxy_url(p) for p in data] if data else []
 
 def download_proxies() -> list[str]:
     logger.info("Загрузка прокси с API...")
@@ -39,7 +43,7 @@ def download_proxies() -> list[str]:
 
     valid_proxies = []
     for item in data:
-        url = f"http://{item['ip']}:{item['port']}"
+        url = _build_proxy_url(item)
         if _validate_proxy(url):
             valid_proxies.append(item)
 
@@ -48,7 +52,7 @@ def download_proxies() -> list[str]:
     with open(PROXY_FILE, "w", encoding="utf-8") as f:
         json.dump(valid_proxies, f, indent=2, ensure_ascii=False)
 
-    return [f"http://{p['ip']}:{p['port']}" for p in valid_proxies]
+    return [_build_proxy_url(p) for p in valid_proxies]
 
 
 def get_valid_proxies() -> list[str]:
@@ -64,7 +68,7 @@ def get_valid_proxies() -> list[str]:
         logger.warning("proxy.json пустой, загружаю новые...")
         return download_proxies()
 
-    urls = [f"http://{p['ip']}:{p['port']}" for p in data]
+    urls = [_build_proxy_url(p) for p in data]
     valid = [p for p in urls if _validate_proxy(p)]
 
     if valid:

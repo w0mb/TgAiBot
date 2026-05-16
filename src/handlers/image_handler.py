@@ -1,10 +1,12 @@
 import io
 import base64
+import re
 from aiogram import Router
 from aiogram.types import Message
 from aiogram import F
 from src.utils.service_manager import ServiceManager
 from src.utils.db_manager import DataBaseManager
+from src.keyboards.inline import add_calories_kb
 
 
 router = Router()
@@ -25,9 +27,14 @@ async def handle_message(
     if cached_response:
         ttl = await db_manager.cache.get_ttl(message.from_user.id, image_bytes)
         await message.answer(cached_response + f"Из кеша ttl: {ttl}")
-        print(await db_manager.cache.get_key_value(message.from_user.id, image_bytes))
         return
 
     answer_text = await service_manager.openai.analyze_image(base64_image)
     await db_manager.cache.set_response(message.from_user.id, image_bytes, answer_text, ttl=60)
-    await message.answer(answer_text)
+
+    numbers = re.findall(r"\d+", answer_text)
+    if numbers:
+        calories = int(numbers[0])
+        await message.answer(answer_text, reply_markup=add_calories_kb(calories))
+    else:
+        await message.answer(answer_text)
