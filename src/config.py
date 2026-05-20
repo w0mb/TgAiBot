@@ -11,8 +11,11 @@ class Settings(BaseSettings):
     postgres_port: str
     postgres_db_name: str
     openai_url: str
+
     redis_port: str
     redis_host: str
+
+    proxy_url: str | None = None
 
     @property
     def proxy_api_url(self):

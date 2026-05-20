@@ -4,6 +4,8 @@ from aiogram.fsm.context import FSMContext
 
 from src.utils.db_manager import DataBaseManager
 from src.utils.states import CalorieState
+from src.utils.calorie_calculator import calculate_daily_norm
+from src.keyboards.inline import profile_kb
 
 
 router = Router()
@@ -22,15 +24,23 @@ async def handle_user_profile(
         await message.answer("Профиль не найден. Введите /start для регистрации.")
         return
 
+    daily_norm = calculate_daily_norm(user.current_weight, user.goal_weight, user.age, user.height, user.activity_level, user.sex)
     calories_today = await db_manager.cache.get_daily_calories(message.from_user.id)
+    goal_direction = "похудение" if user.goal_weight < user.current_weight else "набор массы" if user.goal_weight > user.current_weight else "поддержание веса"
     text = (
         f"<b>👤 Профиль</b>\n\n"
         f"<b>Имя:</b> {user.profile_name}\n"
+        f"<b>Пол:</b> {user.sex}\n"
         f"<b>Текущий вес:</b> {user.current_weight} кг\n"
         f"<b>Целевой вес:</b> {user.goal_weight} кг\n"
+        f"<b>Возраст:</b> {user.age}\n"
+        f"<b>Рост:</b> {user.height} см\n"
+        f"<b>Уровень активности:</b> {user.activity_level}\n"
+        f"<b>Цель:</b> {goal_direction}\n"
+        f"<b>Дневная норма:</b> {daily_norm} ккал\n"
         f"<b>Калории за сегодня:</b> {calories_today} ккал\n"
     )
-    await message.answer(text, parse_mode="HTML")
+    await message.answer(text, parse_mode="HTML", reply_markup=profile_kb())
 
 @router.message(F.text == "🍽️ Добавить калории")
 async def handle_add_calories(

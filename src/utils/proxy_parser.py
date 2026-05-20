@@ -56,6 +56,9 @@ def download_proxies() -> list[str]:
 
 
 def get_valid_proxies() -> list[str]:
+    if settings.proxy_url:
+        logger.info("Найден приватный прокси, подключаюсь через него")
+        return [settings.proxy_url]
     if not PROXY_FILE.exists():
         logger.warning("proxy.json не найден, загружаю новые...")
         return download_proxies()
