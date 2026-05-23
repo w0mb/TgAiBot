@@ -31,11 +31,6 @@ class CacheRepository:
         key = self._get_cache_key(user_id, image_bytes)
         return await self.client.ttl(key)
 
-    async def get_key_value(self, user_id: int, image_bytes: bytes) -> int:
-        key = self._get_cache_key(user_id, image_bytes)
-        value = await self.client.get(key)
-        return (key, value)
-
     def _daily_key(self, user_id: int) -> str:
         return f"daily_calories:{user_id}:{date.today().isoformat()}"
 

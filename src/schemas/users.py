@@ -20,7 +20,8 @@ class UsersUpdate(BaseModel):
     height: int | None = None
     activity_level: str | None = None
     sex: str | None = None
-    
+
+
 class Users(UsersAdd):
     id: int
 

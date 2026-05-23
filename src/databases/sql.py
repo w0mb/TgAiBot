@@ -5,4 +5,7 @@ from src.config import settings
 
 engine = create_async_engine(settings.postgres_url)
 sessions = async_sessionmaker(bind=engine)
-class BaseOrm(DeclarativeBase): ...
+
+
+class BaseOrm(DeclarativeBase):
+    pass

@@ -17,3 +17,8 @@ class CalorieState(StatesGroup):
 class EditWeightState(StatesGroup):
     waiting_for_current_weight = State()
     waiting_for_goal_weight = State()
+    waiting_for_height = State()
+
+
+class NotificationState(StatesGroup):
+    waiting_for_time = State()

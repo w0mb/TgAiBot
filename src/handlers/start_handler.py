@@ -1,14 +1,14 @@
-from aiogram import Router, F
+from aiogram import F, Router
 from aiogram.filters import Command, StateFilter
-from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, Message
 
+from src.filters.first_user_filter import IsFirstLaunch
 from src.keyboards.inline import activity_level_kb, sex_kb
-from src.utils.db_manager import DataBaseManager
+from src.keyboards.main_menu import main_kb
 from src.schemas.users import UsersAdd, UsersUpdate
 from src.utils.calorie_calculator import calculate_daily_norm
-from src.keyboards.main_menu import main_kb
-from src.filters.first_user_filter import IsFirstLaunch
+from src.utils.db_manager import DataBaseManager
 from src.utils.states import RegisterState
 
 router = Router()
@@ -32,7 +32,10 @@ async def start_existing_user(
     state: FSMContext,
 ):
     await state.clear()
-    total = await db_manager.cache.get_daily_calories(message.from_user.id)
+    try:
+        total = await db_manager.cache.get_daily_calories(message.from_user.id)
+    except Exception:
+        total = "—"
     await message.answer(f"Ваш прогресс за сегодня: {total} ккал.", reply_markup=main_kb())
 
 

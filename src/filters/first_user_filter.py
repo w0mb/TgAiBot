@@ -1,8 +1,8 @@
-from aiogram.types import Message
 from aiogram.filters import BaseFilter
+from aiogram.types import Message
 
-from src.utils.db_manager import DataBaseManager
 from src.databases.sql import sessions
+from src.utils.db_manager import DataBaseManager
 
 class IsFirstLaunch(BaseFilter):
     def __init__(self, *args, **kwargs):

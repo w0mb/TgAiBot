@@ -1,12 +1,13 @@
-import io
 import base64
+import io
 import re
-from aiogram import Router
+
+from aiogram import F, Router
 from aiogram.types import Message
-from aiogram import F
-from src.utils.service_manager import ServiceManager
-from src.utils.db_manager import DataBaseManager
+
 from src.keyboards.inline import add_calories_kb
+from src.utils.db_manager import DataBaseManager
+from src.utils.service_manager import ServiceManager
 
 
 router = Router()
@@ -23,14 +24,24 @@ async def handle_message(
     image_bytes = buffer.getvalue()
     base64_image = base64.b64encode(image_bytes).decode("utf-8")
 
-    cached_response = await db_manager.cache.get_response(message.from_user.id, image_bytes)
+    try:
+        cached_response = await db_manager.cache.get_response(message.from_user.id, image_bytes)
+    except Exception:
+        cached_response = None
+
     if cached_response:
-        ttl = await db_manager.cache.get_ttl(message.from_user.id, image_bytes)
+        try:
+            ttl = await db_manager.cache.get_ttl(message.from_user.id, image_bytes)
+        except Exception:
+            ttl = "?"
         await message.answer(cached_response + f"Из кеша ttl: {ttl}")
         return
 
     answer_text = await service_manager.openai.analyze_image(base64_image)
-    await db_manager.cache.set_response(message.from_user.id, image_bytes, answer_text, ttl=60)
+    try:
+        await db_manager.cache.set_response(message.from_user.id, image_bytes, answer_text, ttl=60)
+    except Exception:
+        pass
 
     numbers = re.findall(r"\d+", answer_text)
     if numbers:

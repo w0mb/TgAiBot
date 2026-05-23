@@ -1,8 +1,8 @@
 from aiogram import BaseMiddleware
 
-from src.utils.db_manager import DataBaseManager
-from databases.sql import sessions
 from databases.redis import get_redis_client
+from databases.sql import sessions
+from src.utils.db_manager import DataBaseManager
 
 class DataBaseMiddleWare(BaseMiddleware):
     async def __call__(self, handler, event, data):

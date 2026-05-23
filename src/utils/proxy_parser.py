@@ -1,15 +1,16 @@
-import httpx
-import requests
 import json
 import logging
 from pathlib import Path
+
+import httpx
+import requests
 
 from config import settings
 
 logger = logging.getLogger(__name__)
 
 PROXY_FILE = Path(__file__).parent.parent.parent / "proxy.json"
-print(PROXY_FILE)
+
 
 def _build_proxy_url(item: dict) -> str:
     protocol = item.get("protocol", "http")
@@ -28,14 +29,6 @@ def _validate_proxy(url: str) -> bool:
         logger.debug(f"Прокси {url} недоступен: {e}")
         return False
 
-def read_proxies_from_file() -> list[str]:
-    if not PROXY_FILE.exists():
-        raise FileNotFoundError("proxy.json не найден")
-    
-    with open(PROXY_FILE, "r") as f:
-        data = json.load(f)
-    
-    return [_build_proxy_url(p) for p in data] if data else []
 
 def download_proxies() -> list[str]:
     logger.info("Загрузка прокси с API...")
@@ -84,9 +77,3 @@ def get_valid_proxies() -> list[str]:
         logger.warning(f"Пытаюсь скачать прокси попытка №{counter}")
         valid = download_proxies()
     return valid
-    
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    print(get_valid_proxies())

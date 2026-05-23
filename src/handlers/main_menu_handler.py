@@ -1,11 +1,11 @@
-from aiogram import Router, F
-from aiogram.types import Message
+from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
+from aiogram.types import Message
 
+from src.keyboards.inline import profile_kb
+from src.utils.calorie_calculator import calculate_daily_norm
 from src.utils.db_manager import DataBaseManager
 from src.utils.states import CalorieState
-from src.utils.calorie_calculator import calculate_daily_norm
-from src.keyboards.inline import profile_kb
 
 
 router = Router()
@@ -25,7 +25,10 @@ async def handle_user_profile(
         return
 
     daily_norm = calculate_daily_norm(user.current_weight, user.goal_weight, user.age, user.height, user.activity_level, user.sex)
-    calories_today = await db_manager.cache.get_daily_calories(message.from_user.id)
+    try:
+        calories_today = await db_manager.cache.get_daily_calories(message.from_user.id)
+    except Exception:
+        calories_today = "—"
     goal_direction = "похудение" if user.goal_weight < user.current_weight else "набор массы" if user.goal_weight > user.current_weight else "поддержание веса"
     text = (
         f"<b>👤 Профиль</b>\n\n"
@@ -48,7 +51,10 @@ async def handle_add_calories(
     db_manager: DataBaseManager,
     state: FSMContext,
 ):
-    total = await db_manager.cache.get_daily_calories(message.from_user.id)
+    try:
+        total = await db_manager.cache.get_daily_calories(message.from_user.id)
+    except Exception:
+        total = "—"
     await state.set_state(CalorieState.waiting_for_calories)
     await message.answer(
         f"🍽️ Всего потреблено калорий сегодня: <b>{total}</b> ккал.\n\n"

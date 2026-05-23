@@ -1,7 +1,7 @@
 import openai
 
-from src.services.base_ai_service import BaseAiService
 from src.promts import all_promts
+from src.services.base_ai_service import BaseAiService
 
 
 class OpenAiService(BaseAiService):
@@ -10,7 +10,6 @@ class OpenAiService(BaseAiService):
         self.client = openai.OpenAI(api_key=self._api_key, base_url="https://api.proxyapi.ru/openai/v1")
 
     async def analyze_image(self, base64_image):
-        #надо как-то отрефакторить image_promt куда-то деть хз как
         image_promt = {
             "role": "user",
             "content": [

@@ -1,8 +1,10 @@
 import logging
-from sqlalchemy import insert, select
-from src.schemas.users import Users
+
+from sqlalchemy import insert
+
 from src.models.users import UsersOrm
 from src.repository.base_repository import BaseRepository
+from src.schemas.users import Users
 
 logger = logging.getLogger()
 

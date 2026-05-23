@@ -36,11 +36,10 @@ class Settings(BaseSettings):
     @property
     def redis_url(self):
         return self.__redis_url
+
     @redis_url.setter
     def redis_url(self, redis_url):
         self.__redis_url = redis_url
-
-    
 
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parent.parent / ".env"

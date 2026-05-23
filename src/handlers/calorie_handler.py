@@ -1,15 +1,16 @@
-import io
 import base64
+import io
 import re
-from aiogram import Router, F
-from aiogram.types import Message
-from aiogram.fsm.context import FSMContext
 
+from aiogram import F, Router
+from aiogram.fsm.context import FSMContext
+from aiogram.types import Message
+
+from src.keyboards.inline import add_calories_kb
+from src.keyboards.main_menu import main_kb
 from src.utils.db_manager import DataBaseManager
 from src.utils.service_manager import ServiceManager
 from src.utils.states import CalorieState
-from src.keyboards.inline import add_calories_kb
-from src.keyboards.main_menu import main_kb
 
 router = Router()
 
@@ -50,7 +51,15 @@ async def process_calorie_text(
         await message.answer("Пожалуйста, отправьте <b>фото блюда</b> или введите <b>число</b> (ккал):", parse_mode="HTML")
         return
 
-    total = await db_manager.cache.add_daily_calories(message.from_user.id, calories)
+    try:
+        total = await db_manager.cache.add_daily_calories(message.from_user.id, calories)
+    except Exception:
+        await message.answer(
+            "❌ Не удалось сохранить калории. Сервис отслеживания временно недоступен.",
+            parse_mode="HTML",
+            reply_markup=main_kb(),
+        )
+        return
     await state.clear()
     await message.answer(
         f"✅ Добавлено <b>{calories}</b> ккал.\n"

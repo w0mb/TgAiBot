@@ -6,6 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 from src.databases.sql import BaseOrm
 from src.config import settings
+from src.models.notification import NotificationOrm  # noqa: F401
 from src.models.users import UsersOrm  # noqa: F401
 
 # this is the Alembic Config object, which provides
